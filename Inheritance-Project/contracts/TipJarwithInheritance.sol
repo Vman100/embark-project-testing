@@ -8,7 +8,6 @@ interface eventInterface {
 
 // this contract defines an abstract function for later use
 contract ownerAbstract {
-    address payable owner;
     function showOwner() public view returns (address);
 }
 
