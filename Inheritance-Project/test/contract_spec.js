@@ -32,13 +32,24 @@ contract("TipJar", function () {
 
   it("get owner address", async function () {
     let result = await TipJar.methods.showOwner().call();
-    assert.equal(result, accounts[0]);
+    assert.strictEqual(result, accounts[0]);
   });
+
+  it("any user can send tips", async function () {
+    let oldTipJarBalance = await web3.eth.getBalance(TipJar.address)
+    await web3.eth.sendTransaction({
+      from: accounts[2], 
+      to: TipJar.address, 
+      value: web3.utils.toWei('2', 'ether')
+    });
+    let newTipJarBalance = await web3.eth.getBalance(TipJar.address)
+    assert.notStrictEqual(oldTipJarBalance, newTipJarBalance);
+  })
 
   it("owner can change owner address", async function () {
     let result = await TipJar.methods.changeOwner(accounts[1]).send();
     let log = result.events.logOwnerChange;
-    assert.notEqual(log.returnValues[0], log.returnValues[1]);
+    assert.notStrictEqual(log.returnValues[0], log.returnValues[1]);
   });
 
 
@@ -51,8 +62,10 @@ contract("TipJar", function () {
   });
 
   it("owner can withdraw from TipJar", async function () {
-    let result = await TipJar.methods.withdraw().send({from: accounts[1]});
-    assert.ok(result);
+    let oldTipJarBalance = await web3.eth.getBalance(TipJar.address)
+    await TipJar.methods.withdraw().send({from: accounts[1]});
+    let newTipJarBalance = await web3.eth.getBalance(TipJar.address)
+    assert.notStrictEqual(oldTipJarBalance, newTipJarBalance);
   });
 
   it("non-owner cannot withdraw from TipJar", async function () {
@@ -62,5 +75,4 @@ contract("TipJar", function () {
     assert.ok(didRevertCorrectly(error.message,expectedErrorMessages["owner"]))
   }
   });
-
 })
