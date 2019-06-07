@@ -3,6 +3,7 @@ pragma solidity ^0.5.4;
 // this interface defines an event and a function for later use
 interface eventInterface {
     event logOwnerChange(address oldOwner, address newOwner);
+    event logTipReceived(uint amount);
     function changeOwner(address payable _newOwner) external;
 }
 
@@ -32,6 +33,7 @@ contract Owner is eventInterface, ownerAbstract {
 // this defines tipJar functions
 contract TipJar is Owner {
     function() external payable {
+        emit logTipReceived(msg.value);
     }
     function withdraw() public {
         require(msg.sender == owner, "caller is not owner");
